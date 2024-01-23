@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <link rel="stylesheet" href="./css/saison.css">
+    <script  type="module" src="./js/season.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <a href="./index.html"><button id="logoimg" class="openbtn"><img id="SDlogo" src="./assets/logo7Dtext.png"/></button></a>
+        </div>
+
+        <div id="divflex" class="linkButton">
+            <div class="sidepaneldiv">      
+                <div class="buttonLink">
+                    <a href="./participants.html"><button id="openbutton" class="openbtn">Joueurs</button></a>
+                    <a href="./tournaments.html"><button id="openbutton" class="openbtn">Tournois</button></a>
+                    <a href="./seasons.html"><button id="openbutton" class="openbtn">Saisons</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="maincontentdiv">
+        <h1 id="title">Saison : </h1>
+        <div id="searchfield" class="searchfield">
+            <div id="searchbarblock" class="searchbarblock">
+                <label for="Max" id="LabelMax" class="LabelMax">Affiche Max : </label>
+                <select name="Max" id="Max" class="Max" >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="all" selected="selected">all</option>
+                </select>
+            </div>
+    
+            <div id="searchbarblock" class="searchbarblock">        
+                <label for="searchbar" id="searchbarlabel" class="searchbarlabel">Rechercher : </label>
+                <input id="searchbar" class="searchbar">
+            </div>
+            
+        </div>
+        
+        <table id="rankingtable" class="rankingtable">
+            <thead id="rankingtablehead">
+
+            </thead>
+
+            <tbody id="rankingtablebody">
+                
+            </tbody>
+        </table>
+        </div>
+    </div>
+</body>
+</html>

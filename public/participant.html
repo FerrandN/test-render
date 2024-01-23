@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test</title>
+    <link rel="stylesheet" href="./css/participant.css">
+    <script  type="module" src="./js/participant.js"></script>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <a href="./index.html"><button id="logoimg" class="openbtn"><img id="SDlogo" src="./assets/logo7Dtext.png"/></button></a>
+        </div>
+
+        <div id="divflex" class="linkButton">
+            <div class="sidepaneldiv">      
+                <div class="buttonLink">
+                    <a href="./participants.html"><button id="openbutton" class="openbtn">Joueurs</button></a>
+                    <a href="./tournaments.html"><button id="openbutton" class="openbtn">Tournois</button></a>
+                    <a href="./seasons.html"><button id="openbutton" class="openbtn">Saisons</button></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="maincontentdiv">
+        <h1></h1>
+
+        <div id="mainInfo" class="mainInfo">
+            <div id="playernicknamediv" class="divplayerinfo">
+                <h4>Pseudo : </h4>
+                <p id="playernickname">a</p>
+            </div>
+            <div id="playernamediv" class="divplayerinfo">
+                <h4>Nom : </h4>
+                <p id="playername">a</p>
+            </div>
+            <div id="playersurnamediv" class="divplayerinfo">
+                <h4>Prenom : </h4>
+                <p id="playersurname">a</p>
+            </div>
+            <div id="playertotalpointsdiv" class="divplayerinfo">
+                <h4>Points totaux : </h4>
+                <p id="playertotalpoints">a</p>
+            </div>
+            <div id="playerparticipationdivv" class="divplayerinfo">
+                <h4>Nombre de participations : </h4>
+                <p id="playerparticipation">a</p>
+            </div>
+            <div id="playersumrankingdiv" class="divplayerinfo">
+                <h4>Moyenne des classements : </h4>
+                <p id="playersumranking">a</p>
+            </div>
+
+            <div id="playerfavoritequotediv" class="divplayerinfo">
+                <h4>Phrase fétiche : </h4>
+                <p id="playerfavoritequote">a</p>
+            </div>
+        </div>
+
+        <div id="palmares" class="tableInfoDiv">
+            <div id="tableheadparlmaresdiv" class="tableheader">
+                <h3>Palmarès</h3>
+                <label for="searchbar" id="searchbarlabelpalmares" class="searchbarlabel">Filtre tournois :<input id="searchbarpalmares" class="searchbar"></label>
+                
+            </div>
+            <div class="table-container">
+                <table id="palmarestable" class="playertable">
+                    <thead id="palmarestablehead">
+        
+                    </thead>
+        
+                    <tbody id="palmarestablebody">
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="saisons" class="tableInfoDiv">
+            <div id="tableheadsaisondiv" class="tableheader">
+                <h3>Saison</h3>
+                <label for="searchbar" id="searchbarlabelsaison" class="searchbarlabel">Filtre saisons :<input id="searchbarsaison" class="searchbar"></label>
+            </div>
+            <div class="table-container">
+                <table id="saisonstable" class="playertable">
+                    <thead id="saisonstablehead">
+                        
+                    </thead>
+        
+                    <tbody id="saisonstablebody">
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="matches" class="tableInfoDiv">
+            <div id="tableheadmatchesdiv" class="tableheader">
+                <h3>Matches</h3>
+                <label for="searchbar" id="searchbarlabelmatches" class="searchbarlabel">Filtre Joueurs :<input id="searchbarmatches" class="searchbar"></label>
+            </div>
+            <div class="table-container">
+                <table id="matchestable" class="playertable">
+                    <thead id="matchestablehead">
+
+                    </thead>
+            
+                    <tbody id="matchestablebody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
