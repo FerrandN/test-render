@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 
-const dbConfigPath = '/etc/secrets/ddb_connection.json';
+const dbConfigPath = './json/dbConfig.json';
 const dbConfigService = new DbConfig(dbConfigPath);
 
 const dbConfig = dbConfigService.getDbConfig();
@@ -29,7 +29,7 @@ app.get('/api/main', (req, res) => {
   const sqlQuery = `
   SELECT
       p.player_nickname,
-      SUM(r.players_points_won) + COALESCE(b.bonus, 0) AS playertotalscoreofseason,
+      SUM(r.players_points_won) + COALESCE(b.bonus, 0)+ coalesce (bs.bonus_value, 0) AS playertotalscoreofseason,
       s.season_id
   FROM
       sddb.players p
@@ -49,8 +49,10 @@ app.get('/api/main', (req, res) => {
           GROUP BY
               player_id
       ) b ON p.player_id = b.player_id
+   join
+   		sddb.bonus bs on bs.season_id = s.season_id 
   GROUP BY
-      p.player_nickname, s.season_id, b.bonus;
+      p.player_nickname, s.season_id, b.bonus, bs.bonus_value  ;
 `;
   pool.query(sqlQuery, (error, results) => {
     if (error) {
@@ -70,6 +72,7 @@ app.get('/api/participants', (req, res) => {
         p.player_nickname,
         t.tournament_id,
         r.players_points_won,
+        p.player_id,
         ROW_NUMBER() OVER (PARTITION BY t.tournament_id ORDER BY r.players_points_won DESC) AS rank
     FROM
         sddb.registrations r
@@ -77,60 +80,33 @@ app.get('/api/participants', (req, res) => {
         sddb.players p ON p.player_id = r.player_id
     JOIN
         sddb.tournaments t ON r.tournament_id = t.tournament_id
-)
-SELECT
-    player_nickname,
-    COUNT(tournament_id) AS participation,
-    SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS first_place,
-    SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS second_place,
-    SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS third_place,
-    SUM(players_points_won) AS playertotalscore
-FROM
-    RankedResults
-GROUP BY
-    player_nickname
-order by
-    first_place desc;
-`;
-  pool.query(sqlQuery, (error, results) => {
-    if (error) {
-      console.error('Error executing query:', error);
-      res.status(500).send('Internal Server Error');
-      return;
-    }
-    res.json(results.rows);
-  });
-});
-
-app.get('/api/participants', (req, res) => {
-  //get the ddb datas
-  const sqlQuery = `
-  WITH RankedResults AS (
+),
+PlayerBonus AS (
     SELECT
-        p.player_nickname,
-        t.tournament_id,
-        r.players_points_won,
-        ROW_NUMBER() OVER (PARTITION BY t.tournament_id ORDER BY r.players_points_won DESC) AS rank
+        p.player_id,
+        COALESCE(SUM(b.bonus_value), 0) AS bonus_value
     FROM
-        sddb.registrations r
-    JOIN
-        sddb.players p ON p.player_id = r.player_id
-    JOIN
-        sddb.tournaments t ON r.tournament_id = t.tournament_id
+        sddb.players p
+    LEFT JOIN
+        sddb.bonus b ON p.player_id = b.player_id
+    GROUP BY
+        p.player_id
 )
 SELECT
-    player_nickname,
-    COUNT(tournament_id) AS participation,
+    rr.player_nickname,
+    COUNT(rr.tournament_id) AS participation,
     SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END) AS first_place,
     SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END) AS second_place,
     SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END) AS third_place,
-    SUM(players_points_won) AS playertotalscore
+    SUM(rr.players_points_won) + COALESCE(pb.bonus_value, 0) AS playertotalscore
 FROM
-    RankedResults
+    RankedResults rr
+LEFT JOIN
+    PlayerBonus pb ON rr.player_id = pb.player_id
 GROUP BY
-    player_nickname
-order by
-    first_place desc;
+    rr.player_nickname, pb.bonus_value
+ORDER BY
+    first_place DESC;
 `;
   pool.query(sqlQuery, (error, results) => {
     if (error) {
@@ -168,33 +144,31 @@ app.get('/api/season', (req, res) => {
   var outputDateString = inputDate.toISOString().split('T')[0];
 
   const sqlQuery = `
-  SELECT
-  t.tournament_name,
-  COUNT(r.tournament_id) AS nombre_de_participant,
-  p.player_nickname AS winner_name
+  WITH RankedPlayers AS (
+    SELECT
+        t.tournament_id,
+        r.player_id,
+        p.player_nickname,
+        r.players_points_won,
+        RANK() OVER (PARTITION BY t.tournament_id ORDER BY r.players_points_won DESC) AS player_rank
+    FROM
+        sddb.tournaments t
+    LEFT JOIN
+        sddb.registrations r ON t.tournament_id = r.tournament_id
+    LEFT JOIN
+        sddb.players p ON r.player_id = p.player_id
+)
+SELECT
+    rp.tournament_id,
+    t.tournament_name AS Tournaments_name,
+    COUNT(rp.player_id) AS number_of_registrations,
+    MAX(CASE WHEN rp.player_rank = 1 THEN rp.player_nickname END) AS player_with_most_points
 FROM
-  sddb.tournaments t
-JOIN
-  sddb.seasons s ON s.season_id = t.season_id
-JOIN
-  sddb.registrations r ON r.tournament_id = t.tournament_id
-LEFT JOIN (
-  SELECT
-      tournament_id,
-      MAX(players_points_won) AS max_points
-  FROM
-      sddb.registrations
-  GROUP BY
-      tournament_id
-) AS max_points_subquery ON r.tournament_id = max_points_subquery.tournament_id AND r.players_points_won = max_points_subquery.max_points
+    RankedPlayers rp
 LEFT JOIN
-  sddb.players p ON r.player_id = p.player_id
-WHERE
-  s.starting_date = '${outputDateString}'
+    sddb.tournaments t ON rp.tournament_id = t.tournament_id
 GROUP BY
-  s.season_id,
-  t.tournament_id,
-  p.player_nickname;
+    rp.tournament_id, t.tournament_name;
 `;
   pool.query(sqlQuery, (error, results) => {
     if (error) {
@@ -301,7 +275,7 @@ app.get('/api/participantsaison', (req, res) => {
   select 
   s.starting_date,
   s.ending_date,
-  sum(players_points_won) as total_score_of_season
+  sum(players_points_won) + coalesce (b.bonus_value,0) as total_score_of_season
   from
   sddb.registrations r 
   join
@@ -310,10 +284,12 @@ app.get('/api/participantsaison', (req, res) => {
   sddb.tournaments t on r.tournament_id = t.tournament_id 
   join
   sddb.seasons s on t.season_id = s.season_id 
+  left join 
+  sddb.bonus b on s.season_id = b.season_id  
   where 
-  p.player_nickname = '${participantName}'
+  p.player_nickname = 'nekoyuki0070'
   group by 
-  p.player_id, t.season_id, s.starting_date , s.ending_date 
+  p.player_id, t.season_id, s.starting_date , s.ending_date , b.bonus_value
 `;
   pool.query(sqlQuery, (error, results) => {
     if (error) {
@@ -376,6 +352,7 @@ app.get('/api/participantinfos', (req, res) => {
         p.player_surname,
         t.tournament_id,
         r.players_points_won,
+        p.player_id,
         RANK() OVER (PARTITION BY t.tournament_id ORDER BY r.players_points_won DESC) AS rank
     FROM
         sddb.registrations r
@@ -385,18 +362,20 @@ app.get('/api/participantinfos', (req, res) => {
         sddb.tournaments t ON r.tournament_id = t.tournament_id
 )
 SELECT
-    player_nickname,
-    player_name,
-    player_surname,
-    COUNT(DISTINCT tournament_id) AS participation,
-    AVG(rank) AS average_rank,
-    SUM(players_points_won) AS playertotalscore
+    rr.player_nickname,
+    rr.player_name,
+    rr.player_surname,
+    COUNT(DISTINCT rr.tournament_id) AS participation,
+    AVG(rr.rank) AS average_rank,
+    SUM(players_points_won) + coalesce(b.bonus_value,0) AS playertotalscore
 FROM
-    RankedResults
+    RankedResults rr
+join 
+sddb.bonus b on b.player_id = rr.player_id
     where 
     player_nickname = '${participantName}'
 GROUP BY
-    player_nickname, player_name, player_surname
+    player_nickname, player_name, player_surname, b.bonus_value
 ORDER BY
     average_rank;
 `;
