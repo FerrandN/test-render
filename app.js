@@ -49,7 +49,7 @@ app.get('/api/main', (req, res) => {
           GROUP BY
               player_id
       ) b ON p.player_id = b.player_id
-   join
+   left join
    		sddb.bonus bs on bs.season_id = s.season_id 
   GROUP BY
       p.player_nickname, s.season_id, b.bonus, bs.bonus_value  ;
