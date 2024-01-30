@@ -157,6 +157,10 @@ app.get('/api/season', (req, res) => {
         sddb.registrations r ON t.tournament_id = r.tournament_id
     LEFT JOIN
         sddb.players p ON r.player_id = p.player_id
+    left join
+        sddb.seasons s on s.season_id = t.season_id
+    where 
+          s.starting_date = '${outputDateString}'
 )
 SELECT
     rp.tournament_id,
