@@ -139,7 +139,7 @@ app.get('/api/season', (req, res) => {
 
   var inputDate = new Date(starting_date);
 
-  inputDate.setDate(inputDate.getDate() + 1);
+  inputDate.setDate(inputDate.getDate());
 
   var outputDateString = inputDate.toISOString().split('T')[0];
 
