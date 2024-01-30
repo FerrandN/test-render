@@ -164,9 +164,9 @@ app.get('/api/season', (req, res) => {
 )
 SELECT
     rp.tournament_id,
-    t.tournament_name AS Tournaments_name,
+    t.tournament_name AS Tournament_name,
     COUNT(rp.player_id) AS number_of_registrations,
-    MAX(CASE WHEN rp.player_rank = 1 THEN rp.player_nickname END) AS player_with_most_points
+    MAX(CASE WHEN rp.player_rank = 1 THEN rp.player_nickname END) AS player_nickname
 FROM
     RankedPlayers rp
 LEFT JOIN
