@@ -32,15 +32,15 @@ app.get('/api/main', (req, res) => {
   SUM(r.players_points_won) + COALESCE(p.bonus, 0) + COALESCE(bs.bonus_value, 0) AS playertotalscoreofseason,
   s.season_id
 FROM
-  players p
+  sddb.players p
 JOIN
-  registrations r ON p.player_id = r.player_id
+  sddb.registrations r ON p.player_id = r.player_id
 JOIN
-  tournaments t ON r.tournament_id = t.tournament_id
+  sddb.tournaments t ON r.tournament_id = t.tournament_id
 JOIN
-  seasons s ON t.season_id = s.season_id
+  sddb.seasons s ON t.season_id = s.season_id
 LEFT JOIN
-  bonus bs ON bs.player_id = p.player_id AND bs.season_id = s.season_id
+  sddb.bonus bs ON bs.player_id = p.player_id AND bs.season_id = s.season_id
 GROUP BY
   p.player_nickname, s.season_id, p.bonus, bonus_value ;
 `;
