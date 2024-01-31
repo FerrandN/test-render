@@ -266,24 +266,24 @@ app.get('/api/participantsaison', (req, res) => {
   var participantName = req.query.participantName;
 
   const sqlQuery = `
-  select 
+  SELECT
   s.starting_date,
-  s.ending_date,
-  sum(players_points_won) + coalesce (b.bonus_value,0) as total_score_of_season
-  from
-  sddb.registrations r 
-  join
-  sddb.players p on r.player_id = p.player_id 
-  join
-  sddb.tournaments t on r.tournament_id = t.tournament_id 
-  join
-  sddb.seasons s on t.season_id = s.season_id 
-  left join 
-  sddb.bonus b on s.season_id = b.season_id  
+  SUM(r.players_points_won) + COALESCE(p.bonus, 0) + COALESCE(bs.bonus_value, 0) AS playertotalscoreofseason,
+  s.ending_date
+FROM
+  sddb.players p
+JOIN
+  sddb.registrations r ON p.player_id = r.player_id
+JOIN
+  sddb.tournaments t ON r.tournament_id = t.tournament_id
+JOIN
+  sddb.seasons s ON t.season_id = s.season_id
+LEFT JOIN
+  sddb.bonus bs ON bs.player_id = p.player_id AND bs.season_id = s.season_id
   where 
-  p.player_nickname = 'nekoyuki0070'
-  group by 
-  p.player_id, t.season_id, s.starting_date , s.ending_date , b.bonus_value
+  p.player_nickname = '${participantName}'
+GROUP BY
+  p.player_nickname, s.season_id, p.bonus, bonus_value ;
 `;
   pool.query(sqlQuery, (error, results) => {
     if (error) {

@@ -1,7 +1,9 @@
 import { TableGenerator } from "./TableGenerator.js";
 import { DatasArray } from "./DatasArray.js";
 
-const tableDatas = new DatasArray();
+const tableDatasPalmares = new DatasArray();
+const tableDatasSeason = new DatasArray();
+const tableDatasMatches = new DatasArray();
 
 document.addEventListener("DOMContentLoaded", function() {
 
@@ -32,8 +34,8 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(`/api/participantpalmares?participantName=${participantName}`)
     .then(response => response.json())
     .then(data => {
-        tableDatas.JsonDatasToArray(data);
-        const tableGeneratorpalmares = new TableGenerator(tableDatas,"palmarestablebody","palmarestablehead");
+        tableDatasPalmares.JsonDatasToArray(data);
+        const tableGeneratorpalmares = new TableGenerator(tableDatasPalmares,"palmarestablebody","palmarestablehead");
         tableGeneratorpalmares.generateTable();
 
         document.getElementById("searchbarpalmares").addEventListener("input",(event)=>{tableGeneratorpalmares.eventChangeFilterValue(event.target.value);});
@@ -43,9 +45,9 @@ document.addEventListener("DOMContentLoaded", function() {
     })
     .then(response => response.json())
     .then(data => {
-        tableDatas.JsonDatasToArray(data);
+        tableDatasSeason.JsonDatasToArray(data);
 
-        const tableGeneratorseason = new TableGenerator(tableDatas,"saisonstablebody","saisonstablehead");
+        const tableGeneratorseason = new TableGenerator(tableDatasSeason,"saisonstablebody","saisonstablehead");
         tableGeneratorseason.generateTable();
 
         document.getElementById("searchbarsaison").addEventListener("input",(event)=>{tableGeneratorseason.eventChangeFilterValue(event.target.value);});
@@ -55,9 +57,9 @@ document.addEventListener("DOMContentLoaded", function() {
     })
     .then(response => response.json())
     .then(data => {
-        tableDatas.JsonDatasToArray(data);
+        tableDatasMatches.JsonDatasToArray(data);
 
-        const tableGeneratormatch = new TableGenerator(tableDatas,"matchestablebody","matchestablehead");
+        const tableGeneratormatch = new TableGenerator(tableDatasMatches,"matchestablebody","matchestablehead");
         tableGeneratormatch.generateTable();
 
         document.getElementById("searchbarmatches").addEventListener("input",(event)=>{tableGeneratormatch.eventChangeFilterValue(event.target.value);});        
