@@ -28,31 +28,21 @@ app.get('/api/main', (req, res) => {
   //get the ddb datas
   const sqlQuery = `
   SELECT
-      p.player_nickname,
-      SUM(r.players_points_won) + COALESCE(b.bonus, 0)+ coalesce (bs.bonus_value, 0) AS playertotalscoreofseason,
-      s.season_id
-  FROM
-      sddb.players p
-  JOIN
-      sddb.registrations r ON p.player_id = r.player_id
-  JOIN
-      sddb.tournaments t ON r.tournament_id = t.tournament_id
-  JOIN
-      sddb.seasons s ON t.season_id = s.season_id
-      LEFT JOIN
-      (
-          SELECT
-              player_id,
-              MAX(bonus) AS bonus
-          FROM
-              sddb.players
-          GROUP BY
-              player_id
-      ) b ON p.player_id = b.player_id
-   left join
-   		sddb.bonus bs on bs.season_id = s.season_id 
-  GROUP BY
-      p.player_nickname, s.season_id, b.bonus, bs.bonus_value  ;
+  p.player_nickname,
+  SUM(r.players_points_won) + COALESCE(p.bonus, 0) + COALESCE(bs.bonus_value, 0) AS playertotalscoreofseason,
+  s.season_id
+FROM
+  players p
+JOIN
+  registrations r ON p.player_id = r.player_id
+JOIN
+  tournaments t ON r.tournament_id = t.tournament_id
+JOIN
+  seasons s ON t.season_id = s.season_id
+LEFT JOIN
+  bonus bs ON bs.player_id = p.player_id AND bs.season_id = s.season_id
+GROUP BY
+  p.player_nickname, s.season_id, p.bonus, bonus_value ;
 `;
   pool.query(sqlQuery, (error, results) => {
     if (error) {
