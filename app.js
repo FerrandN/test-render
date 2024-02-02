@@ -201,13 +201,26 @@ app.get('/api/tournament', (req, res) => {
   var tournamentName = req.query.tournamentName;
 
   const sqlQuery = `
-  SELECT m.match_id, CONCAT(p1.player_nickname, ' vs ', p2.player_nickname) as Players, m.winner_id as Gagnant, m.damages_player1 , m.damages_player2 
-  FROM sddb.matches m
-  JOIN sddb.players p1 ON player1_id = p1.player_id
-  JOIN sddb.players p2 ON player2_id = p2.player_id
-  JOIN sddb.tournaments t ON t.tournament_id = m.tournament_id 
-  WHERE t.tournament_name = '${tournamentName}'
-  GROUP BY m.match_id, p1.player_nickname, p2.player_nickname
+  SELECT 
+  m.match_id, 
+  CONCAT(p1.player_nickname, ' vs ', p2.player_nickname) as Players, 
+  pw.player_nickname as Gagnant_Nickname, 
+  m.damages_player1, 
+  m.damages_player2 
+FROM 
+  sddb.matches m
+JOIN 
+  sddb.players p1 ON m.player1_id = p1.player_id
+JOIN 
+  sddb.players p2 ON m.player2_id = p2.player_id
+JOIN 
+  sddb.players pw ON m.winner_id = pw.player_id
+JOIN 
+  sddb.tournaments t ON t.tournament_id = m.tournament_id 
+WHERE 
+  t.tournament_name = '${tournamentName}'
+GROUP BY 
+  m.match_id, p1.player_nickname, p2.player_nickname, pw.player_nickname;
 `;
   pool.query(sqlQuery, (error, results) => {
     if (error) {
@@ -347,6 +360,7 @@ app.get('/api/participantinfos', (req, res) => {
         t.tournament_id,
         r.players_points_won,
         p.player_id,
+        p.bonus,
         RANK() OVER (PARTITION BY t.tournament_id ORDER BY r.players_points_won DESC) AS rank
     FROM
         sddb.registrations r
@@ -361,7 +375,7 @@ SELECT
     rr.player_surname,
     COUNT(DISTINCT rr.tournament_id) AS participation,
     AVG(rr.rank) AS average_rank,
-    SUM(players_points_won) + coalesce(b.bonus_value,0) AS playertotalscore
+    SUM(players_points_won) + coalesce(b.bonus_value,0)+ coalesce(rr.bonus,0) AS playertotalscore
 FROM
     RankedResults rr
 join 
@@ -369,7 +383,7 @@ sddb.bonus b on b.player_id = rr.player_id
     where 
     player_nickname = '${participantName}'
 GROUP BY
-    player_nickname, player_name, player_surname, b.bonus_value
+    player_nickname, player_name, player_surname, b.bonus_value, rr.bonus
 ORDER BY
     average_rank;
 `;

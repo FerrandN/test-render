@@ -30,12 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
             tableDatas.JsonDatasToArray(data);
             const tableGenerator = new TableGenerator(tableDatas,"rankingtablebody","rankingtablehead");
             tableGenerator.generateTable();
+            document.getElementById("searchbar").addEventListener("input",(event)=>{tableGenerator.eventChangeFilterValue(event.target.value);});
+            document.getElementById("Max").addEventListener("change",(event)=>{tableGenerator.eventChangeTableMax(event.target.value);});
         })
         .catch(error => console.error('Error fetching data:', error));
 
     let title = document.getElementById("title");
     title.textContent = title.textContent + tournamentName;
-    document.getElementById("searchbar").addEventListener("input",(event)=>{tableGenerator.eventChangeFilterValue(event.target.value);});
-    document.getElementById("Max").addEventListener("change",(event)=>{tableGenerator.eventChangeTableMax(event.target.value);});
+
 });
 
